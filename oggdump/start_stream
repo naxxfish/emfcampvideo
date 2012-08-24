@@ -5,6 +5,8 @@ stream_port=8000
 stream_mountpoint=test.ogv
 stream_password=SUPATEST
 
+overlay=frame_overlay.png
+
 echo " ______ __  __ ______ __  __ "
 echo "|  ____|  \/  |  ____|  \/  |"
 echo "| |__  | \  / | |__  | \  / |  Video Streaming"
@@ -44,7 +46,8 @@ while true;
 	mkfifo live_stream
 	dvsink-command -- cat - > live_stream &
 	ffmpeg -i live_stream \
-		-f ogg -vcodec libtheora -qscale 7 -acodec libvorbis  $filename.ogv #| oggfwd $stream_host $stream_port $stream_password $stream_mountpoint
+		-vf "movie=$overlay [overlay]; [in][overlay] overlay" \
+		-f ogg -vcodec libtheora -qscale 20 -acodec libvorbis -qscale 6 $filename.ogv #| oggfwd $stream_host $stream_port $stream_password $stream_mountpoint
 	rm live_stream
 	vorbiscomment -w $filename.ogv -c $filename.dat
 	echo "Embedded metadata into $filename.ogv"
