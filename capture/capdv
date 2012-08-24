@@ -1,0 +1,7 @@
+#!/bin/bash
+device=$1
+overlay=frame_overlay.png
+echo "Grabbing $device and overlaying $overlay"
+dvgrab -format dv1 - | ffmpeg -f dv -i - \
+	-vf  "movie=$overlay [overlay]; [in][overlay] overlay" \
+	-f dv -vcodec dvvideo -acodec copy -target pal-dv - | dvsource-file /dev/stdin
