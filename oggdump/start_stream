@@ -1,0 +1,60 @@
+#!/bin/bash
+
+stream_host=localhost
+stream_port=8000
+stream_mountpoint=test.ogv
+stream_password=SUPATEST
+
+echo " ______ __  __ ______ __  __ "
+echo "|  ____|  \/  |  ____|  \/  |"
+echo "| |__  | \  / | |__  | \  / |  Video Streaming"
+echo "|  __| | |\/| |  __| | |\/| |   EMF Camp 2012"
+echo "| |____| |  | | |    | |  | |"
+echo "|______|_|  |_|_|    |_|  |_|"
+echo
+echo
+echo Script by chris@naxxfish.eu
+
+
+
+while true;
+	do
+	echo ESSENTIAL MEATADATA
+	echo "------------------"
+	read -p "Title of Talk: " title
+	read -p "Name of Speaker: " author
+	read -p "Description of talk: " description
+	echo EMF2012-$title-$author >> namegen
+	filename=`<namegen sed -e 's/ /_/g' `
+	rm namegen
+	echo "Filename: $filename"
+	echo "-----------------"
+	echo "TITLE=$title" >> $filename.dat
+	echo "ARTIST=$author" >> $filename.dat
+	echo "DESCRIPTION=$description" >> $filename.dat
+	echo "ALBUM=EMFCAMP 2012" >> $filename.dat
+	echo "LOCATION=EMF Camp 2012 http://www.emfcamp.org/" >> $filename.dat
+	echo "DATE=`date +%F`" >> $filename.dat
+	echo "GEO_LOCATION= 52.061 ; -0.710" >> $filename.dat
+	echo "LICENSE=Creative Commons Attribution-NonCommercial 3.0 Unported License." >> $filename.dat
+	echo "ORGANISATION=Electromagnetic Field Ltd." >> $filename.dat
+	echo "CONTACT=streaming@emfcamp.org" >> $filename.dat
+	echo
+	sleep 1
+	mkfifo live_stream
+	dvsink-command -- cat - > live_stream &
+	ffmpeg -i live_stream \
+		-f ogg -vcodec libtheora -qscale 7 -acodec libvorbis  $filename.ogv #| oggfwd $stream_host $stream_port $stream_password $stream_mountpoint
+	rm live_stream
+	vorbiscomment -w $filename.ogv -c $filename.dat
+	echo "Embedded metadata into $filename.ogv"
+	echo "Calculating MD5 ... "
+	md5sum $filename.ogv >> $filename.dat
+	echo "Verifying MD5 .... "
+	tail -n 1 $filename.dat | md5sum -c
+	sleep 1
+	read -p "Again? [Y/n]: " yn
+	case $yn in
+		[Nn]* )	exit;;
+	esac
+done
