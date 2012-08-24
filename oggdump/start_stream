@@ -46,8 +46,7 @@ while true;
 	mkfifo live_stream
 	dvsink-command -- cat - > live_stream &
 	ffmpeg -i live_stream \
-		-vf "movie=$overlay [overlay]; [in][overlay] overlay" \
-		-f ogg -vcodec libtheora -qscale 20 -acodec libvorbis -qscale 6 $filename.ogv #| oggfwd $stream_host $stream_port $stream_password $stream_mountpoint
+		-f ogg -vcodec libtheora -qscale 20 -acodec libvorbis -qscale 6 $filename.ogv
 	rm live_stream
 	vorbiscomment -w $filename.ogv -c $filename.dat
 	echo "Embedded metadata into $filename.ogv"
@@ -55,6 +54,7 @@ while true;
 	md5sum $filename.ogv >> $filename.dat
 	echo "Verifying MD5 .... "
 	tail -n 1 $filename.dat | md5sum -c
+	uploadify $filename
 	sleep 1
 	read -p "Again? [Y/n]: " yn
 	case $yn in

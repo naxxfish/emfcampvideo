@@ -1,0 +1,7 @@
+#!/bin/bash
+filename=$1
+echo put $1.ogv /ingest/inbound/ >> batchfile
+echo put $1.dat /ingest/inbound/ >> batchfile
+sftp ingest@ingester.emf.naxxfish.eu -b batchfile
+rm batchfile
+
