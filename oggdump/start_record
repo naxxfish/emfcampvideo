@@ -1,0 +1,3 @@
+#!/bin/bash
+filename=$1
+dvsink-command -h localhost -p 5050 ./record.sh $filename
