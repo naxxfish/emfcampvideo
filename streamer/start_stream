@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+dvsink-command ./streamer.sh frame_overlay.png test.ogv localhost 8000 SUPATEST
